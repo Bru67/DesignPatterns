@@ -10,19 +10,20 @@ import br.pucpr.planet.PlanetaColumns;
 import br.pucpr.table.Table;
 import br.pucpr.table.TableBuilder;
 import br.pucpr.table.model.ColumnTableData;
+import br.pucpr.table.model.PagedTableData;
 import br.pucpr.user.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class Main {
   public static void main(String[] args)
-      throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+          throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     final var usuarios = new ArrayList<User>();
     usuarios.add(
-        new User(101L, "Carlos Eduardo de Souza", "carlos.souza@email.com", "12345678901"));
+            new User(101L, "Carlos Eduardo de Souza", "carlos.souza@email.com", "12345678901"));
     usuarios.add(new User(102L, "Ana Maria Silva", "ana.silva@email.com", "98765432100"));
     usuarios.add(
-        new User(103L, "João Pedro de Alcântara Bragança", "joao.pedro@email.com", "45678912345"));
+            new User(103L, "João Pedro de Alcântara Bragança", "joao.pedro@email.com", "45678912345"));
     usuarios.add(new User(104L, "Mariana Costa", "marianacosta.email.com", "11122233344"));
     usuarios.add(new User(105L, "Lucas Mendes", "lucas@email.com", "12345"));
     usuarios.add(new User(106L, "", "beatriz@email.com", "55566677788"));
@@ -31,10 +32,25 @@ public class Main {
     System.out.println("-------------------");
     new Table(
             new ColumnTableData<>(
-                usuarios, new IdColumn(), new CpfColumn(), new EmailColumn(), new NameColumn()),
+                    usuarios, new IdColumn(), new CpfColumn(), new EmailColumn(), new NameColumn()),
             LIGHT,
             true)
-        .print();
+            .print();
+
+    System.out.println("USUÁRIOS PAGINADOS (3)");
+    System.out.println("-------------------");
+
+    var dataUser = new ColumnTableData<>(
+            usuarios,
+            new IdColumn(),
+            new CpfColumn(),
+            new EmailColumn(),
+            new NameColumn()
+    );
+
+    var paginatedDataUsers = new PagedTableData(dataUser, 3);
+    new Table(paginatedDataUsers).print();
+
 
     final var planetas = new ArrayList<Planet>();
     planetas.add(new Planet("Mercúrio", 4879, 57_910_000L, ROCK));
@@ -56,15 +72,25 @@ public class Main {
     System.out.println("-------------------");
 
     new TableBuilder()
-        .light()
-        .rightAligned()
-        .withData(
+            .light()
+            .rightAligned()
+            .withData(
+                    planetas,
+                    c ->
+                            c.add(PlanetaColumns.values())
+                                    .add(
+                                            "Distance (au)",
+                                            p -> "%,11.2f".formatted(Planet.kmToAu(p.sunDistanceKm()))))
+            .print();
+
+    System.out.println("PLANETAS PAGINADOS (3)");
+    System.out.println("-------------------");
+
+    var dataPlanets = new ColumnTableData<>(
             planetas,
-            c ->
-                c.add(PlanetaColumns.values())
-                    .add(
-                        "Distance (au)",
-                        p -> "%,11.2f".formatted(Planet.kmToAu(p.sunDistanceKm()))))
-        .print();
+            PlanetaColumns.values()
+    );
+    var paginatedData = new PagedTableData(dataPlanets, 3);
+    new Table(paginatedData).print();
   }
 }
